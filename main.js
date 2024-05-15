@@ -6,7 +6,7 @@ const window_height = window.innerHeight;
 const window_width = window.innerWidth;
 
 canvas.height = 600;
-canvas.width = 1000;
+canvas.width = 1300;
 
 canvas.style.background = "black";
 
