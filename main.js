@@ -1,12 +1,13 @@
 const canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
-// Obtiene las dimensiones de la pantalla actual
-const window_height = window.innerHeight;
-const window_width = window.innerWidth;
-
-canvas.height = 600;
-canvas.width = 1300;
+// Ajustar el canvas para que ocupe toda la pantalla
+const adjustCanvasSize = () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+};
+adjustCanvasSize();
+window.addEventListener('resize', adjustCanvasSize);
 
 canvas.style.background = "black";
 
@@ -25,7 +26,6 @@ class Circle {
 
     draw(context) {
         context.beginPath();
-
         context.strokeStyle = this.color;
         context.textAlign = "center";
         context.textBaseline = "middle";
@@ -42,7 +42,7 @@ class Circle {
     update(context) {
         this.draw(context);
 
-        if ((this.posX + this.radius) > window_width) {
+        if ((this.posX + this.radius) > canvas.width) {
             this.dx = -this.dx;
         }
 
@@ -53,7 +53,7 @@ class Circle {
         // Comprobar si el círculo sale del área visible
         if ((this.posY - this.radius) < 0) {
             // Reiniciar la posición del círculo al borde inferior de la pantalla
-            this.posY = window_height + this.radius;
+            this.posY = canvas.height + this.radius;
         }
 
         this.posX += this.dx;
@@ -80,13 +80,14 @@ function emitLight(x, y) {
 
 let arrayCircle = [];
 let NumeroCirculos = 10;
+let score = 0;
 
 for (let i = 0; i < NumeroCirculos; i++) {
-    let randomX = Math.random() * (window_width - 200) + 100;
-    let randomY = window_height + Math.floor(Math.random() * 200); // Empezar los círculos fuera de la pantalla
+    let randomX = Math.random() * (canvas.width - 200) + 100;
+    let randomY = canvas.height + Math.floor(Math.random() * 200); // Empezar los círculos fuera de la pantalla
     let randomRadius = Math.floor(Math.random() * 100 + 25);
     let randomSpeed = Math.floor(Math.random() * 10) + 1;
-    let miCirculo = new Circle(randomX, randomY, randomRadius, 'Blue', i + 1, 5);
+    let miCirculo = new Circle(randomX, randomY, randomRadius, 'Blue', i + 1, randomSpeed);
     arrayCircle.push(miCirculo);
 }
 
@@ -96,7 +97,7 @@ function detectarColision(circulo1, circulo2) {
 }
 
 function updateCircle() {
-    ctx.clearRect(0, 0, window_width, window_height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     arrayCircle.forEach(circle => {
         circle.color = "Blue";
@@ -155,16 +156,33 @@ canvas.addEventListener("click", function(event) {
             emitLight(circle.posX, circle.posY);
             // Eliminar el círculo
             arrayCircle.splice(i, 1);
-        }}});
-            
+            // Incrementar el puntaje
+            score++;
+            updateScoreDisplay();
+        }
+    }
+});
 
+// Crear y mostrar el contador de puntaje
+let scoreDisplay = document.createElement('div');
+scoreDisplay.style.position = 'fixed';
+scoreDisplay.style.top = '10px';
+scoreDisplay.style.right = '10px';
+scoreDisplay.style.color = 'white';
+scoreDisplay.style.fontSize = '24px';
+document.body.appendChild(scoreDisplay);
+
+function updateScoreDisplay() {
+    scoreDisplay.textContent = `Puntaje: ${score}`;
+}
 
 // Agregar contador para mostrar la posición del cursor
 let cursorPosition = document.createElement('div');
 cursorPosition.style.position = 'fixed';
-cursorPosition.style.top = '10px';
+cursorPosition.style.top = '40px';
 cursorPosition.style.left = '10px'; // Ajustar para que se coloque en la esquina superior izquierda
 cursorPosition.style.color = 'white';
+cursorPosition.style.fontSize = '24px';
 document.body.appendChild(cursorPosition);
 
 // Agregar evento de actualización de la posición del cursor
@@ -173,3 +191,6 @@ document.addEventListener('mousemove', function(event) {
     let mouseY = event.clientY;
     cursorPosition.textContent = `X: ${mouseX}, Y: ${mouseY}`;
 });
+
+// Inicializar la visualización del puntaje
+updateScoreDisplay();
